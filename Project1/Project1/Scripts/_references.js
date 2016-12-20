@@ -1,0 +1,10 @@
+﻿/// <autosync enabled="true" />
+/// <reference path="../movie application.js" />
+/// <reference path="angular.js" />
+/// <reference path="angular-animate.js" />
+/// <reference path="angular-filter.js" />
+/// <reference path="angular-messages.js" />
+/// <reference path="angular-resource.js" />
+/// <reference path="angular-touch.js" />
+/// <reference path="ngstorage.js" />
+/// <reference path="ui-bootstrap-tpls-1.3.3.js" />

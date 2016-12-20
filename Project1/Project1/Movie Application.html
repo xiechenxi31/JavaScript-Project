@@ -1,0 +1,336 @@
+﻿<!DOCTYPE html>
+<html ng-app="MovieApp">
+<head>
+    <title>Project one</title>
+	<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="Scripts/angular.js"></script>
+    <script src="Scripts/angular-touch.js"></script>
+    <script src="Scripts/angular-resource.js"></script>
+    <script src="Movie Application.js"></script>
+    <script src="Scripts/ngStorage.js"></script>
+    <script src="Scripts/ui-bootstrap-tpls-1.3.3.js"></script>
+    <link href="Stylesheets/bootstrap.css" rel="stylesheet" />
+    <script src="Scripts/angular-animate.js"></script>
+    <script src="Scripts/angular-messages.js"></script>
+
+</head>
+<body ng-controller="MovieCtrl">
+    <img src="Images/tmdblogo.png" />
+    <div ng-hide="view">
+        <form name="searchform" ng-submit="searchinfo()" novalidate>
+            <div class="form-group" ng-class="{'has-error' : searchform.name.$touched && searchform.name.$invalid}">
+                <label class="control-label">Movie Name</label>
+                <input type="text" class="form-control" ng-model="storage.moviename" name="name" required minlength="3" />
+                <div class="help-block" ng-messages="searchform.name.$error" ng-show="searchform.name.$touched">
+                    <p ng-message="required">The moview name field is required</p>
+                    <p ng-message="minlength"> must enter at least 3 characters</p>
+                </div>
+                <label class="control-label">Year of the Movie</label>
+            <select class="form-group" ng-model="storage.movieyear" ng-options="years for years in selectyears"></select>
+                <!--<input type="text" class="form-control" ng-model="storage.movieyear" />-->
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success" ng-disabled="searchform.$invalid">Search</button>
+                </div>
+            </div>
+
+            <!--<p>searchform.$valid={{searchform.$valid}}</p>
+            <p>searchform.$invalid={{searchform.$invalid}}</p>
+            <p>searchform.$dirty={{searchform.$dirty}}</p>
+            <p>searchformorm.$pristine={{searchform.$pristine}}</p>-->
+
+        </form>
+
+        <!--<label>Enter a movie name</label>
+        <input type="text" ng-model="storage.moviename"/>
+        <label>Select a year</label>       
+         <select ng-model="storage.movieyear" ng-options="years for years in selectyears"></select>
+        
+        <p><button type="button" ng-click="searchinfo()">Search</button></p>-->
+
+
+    </div>
+
+    <div ng-show="SearchResult.total_results == 0">
+        <p>Sorry cannot find any relative movies</p>
+    </div>
+
+    <div class="visible-xs container-fluid" ng-show="view && SearchResult.total_results != 0">
+        <p>extra small</p>
+        <uib-carousel active="active" class="image-fit">
+                <div class="col-xs-4">
+                    <div ng-show="postersite != null">
+                        <img src="http://image.tmdb.org/t/p/w92{{postersite}}" />
+                    </div>
+                    <div ng-show="postersite == null">
+                        <img src="http://dweb/comp322/ws/noposter.jpg" />
+                    </div>
+                    
+                </div>
+                <div class="col-xs-8">
+                    <p>{{movietitle}}</p>
+                    <p>{{tag}}</p>
+                    <table>
+                        <tr>
+                            <td class="col-xs-3">
+                                <p>Director</p>
+                            </td>
+                            <td class="col-xs-5">
+                                <p>{{directorname}}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-3">
+                                <p>Year released</p>
+                            </td>
+                            <td class="col-xs-5">
+                                <p>{{year | limitTo:4}}</p>
+                            </td>
+                        </tr>
+                        <tr ng-hide="movietime == 0">
+                            <td class="col-xs-3">
+                                <p>Running time</p>
+                            </td>
+                            <td class="col-xs-5">
+                                <p>{{movietime}} Mins</p>
+                            </td>
+                        </tr>
+                    </table>
+                    </div>
+        </uib-carousel>
+    </div>
+
+    <div class="visible-sm container-fluid" ng-show="view && SearchResult.total_results != 0">
+        <p>small</p>
+
+        <uib-carousel active="active" class="image-fit">
+            <div class="col-xs-3">
+                <div ng-show="postersite != null">
+                    <img src="http://image.tmdb.org/t/p/w185{{postersite}}" />
+                </div>
+                <div ng-show="postersite == null">
+                    <img src="http://dweb/comp322/ws/noposter.jpg" />
+                </div>
+
+            </div>
+            <div class="col-xs-9">
+                <p>{{movietitle}}</p>
+                <p>{{tag}}</p>
+                <table>
+                    <tr ng-hide="theoverview">
+                        <td class="col-xs-2">
+                            <p>Plot overview</p>
+                        </td>
+                        <td class="col-xs-7">
+                            <p>{{plotoverview}}</p>
+                        </td>
+                    </tr>
+
+
+                    <tr ng-show="castmembers.length > 0">
+                        <td class="col-xs-2" >
+                            <p>Primary cast</p>
+                        </td>
+                        <td class="col-xs-7" >
+                            <div ng-repeat="cast in castmembers |limitTo : 7" style="float:left">{{cast.name}},</div>
+                            <div style="float:left">{{castmembers[8].name}}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-xs-2">
+                            <p>Director</p>
+                        </td>
+                        <td class="col-xs-7">
+                            <p>{{directorname}}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-xs-2">
+                            <p>Year released</p>
+                        </td>
+                        <td class="col-xs-7">
+                            <p>{{year | limitTo:4}}</p>
+                        </td>
+                    </tr>
+                    <tr ng-hide="movietime == 0">
+                        <td class="col-xs-2">
+                            <p>Running time</p>
+                        </td>
+                        <td class="col-xs-7">
+                            <p>{{movietime}} Mins</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="col-xs-2" ng-hide="thebudget == 0 && therevenue==0">
+                            <p>Financials</p>
+                        </td>
+                        <td class="col-xs-7">
+                            <div style="float:left" ng-hide="thebudget == 0">Budget:${{thebudget}}M/</div>
+                            <div style="float:left" ng-hide="therevenue == 0">Revenue:${{therevenue}}M</div>
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+        </uib-carousel>
+
+
+
+
+
+    </div>
+    <div class="visible-md container-fluid" ng-show="view && SearchResult.total_results != 0">
+        <p>Medium</p>
+
+        <uib-carousel active="active" class="image-fit">
+            <div class="col-xs-3">
+                <div ng-show="postersite != null">
+                    <img src="http://image.tmdb.org/t/p/w185{{postersite}}" />
+                </div>
+                <div ng-show="postersite == null">
+                    <img src="http://dweb/comp322/ws/noposter.jpg" />
+                </div>
+
+            </div>
+            <div class="col-xs-6">
+                <p>{{movietitle}}</p>
+                <p>{{tag}}</p>
+                <table>
+                    <tr ng-hide="theoverview">
+                        <td class="col-xs-1" >
+                            <p>Plot overview</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <p>{{plotoverview}}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-xs-1">
+                            <p>Director</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <p>{{directorname}}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-xs-1">
+                            <p>Year released</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <p>{{year | limitTo:4}}</p>
+                        </td>
+                    </tr>
+                    <tr ng-hide="movietime == 0">
+                        <td class="col-xs-1">
+                            <p>Running time</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <p>{{movietime}} Mins</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="col-xs-1" ng-hide="thebudget == 0 && therevenue==0">
+                            <p>Financials</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <div style="float:left" ng-hide="thebudget == 0">Budget:${{thebudget}}M/</div>
+                            <div style="float:left" ng-hide="therevenue == 0">Revenue:${{therevenue}}M</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="col-xs-3" ng-show="castmembers.length > 0">
+                <p>Primary cast</p>
+                <div ng-repeat="cast in castmembers |limitTo : 8">{{cast.name}} as {{cast.character}}</div>
+            </div>
+        
+        
+        
+        </uib-carousel>
+
+
+    </div>
+    <div class="visible-lg container-fluid" ng-show="view && SearchResult.total_results != 0">
+        <p>Large</p>
+        <uib-carousel active="active" class="image-fit">
+            <div class="col-xs-3">
+                <div ng-show="postersite != null">
+                    <img src="http://image.tmdb.org/t/p/w185{{postersite}}" />
+                </div>
+                <div ng-show="postersite == null">
+                    <img src="http://dweb/comp322/ws/noposter.jpg" />
+                </div>
+
+            </div>
+            <div class="col-xs-6">
+                <p>{{movietitle}}</p>
+                <p>{{tag}}</p>
+                <table>
+                    <tr ng-hide="theoverview">
+                        <td class="col-xs-1">
+                            <p>Plot overview</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <p>{{plotoverview}}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-xs-1">
+                            <p>Director</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <p>{{directorname}}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-xs-1">
+                            <p>Year released</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <p>{{year | limitTo:4}}</p>
+                        </td>
+                    </tr>
+                    <tr ng-hide="movietime == 0">
+                        <td class="col-xs-1">
+                            <p>Running time</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <p>{{movietime}} Mins</p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="col-xs-1" ng-hide="thebudget == 0 && therevenue==0">
+                            <p>Financials</p>
+                        </td>
+                        <td class="col-xs-5">
+                            <div style="float:left" ng-hide="thebudget == 0">Budget:${{thebudget}}M/</div>
+                            <div style="float:left" ng-hide="therevenue == 0">Revenue:${{therevenue}}M</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="col-xs-3" ng-show="castmembers.length > 0">
+                <p>Primary cast</p>              
+                <div ng-repeat="cast in castmembers |limitTo : 8">{{cast.name}} as {{cast.character}}</div>
+            </div>
+        </uib-carousel>
+    </div>
+
+    <div  ng-show="view">
+        <div ng-show="SearchResult.total_results != 0">
+            <button type="button" ng-click="nextone()" ng-disabled="indexnum == 19 || indexnum == SearchResult.total_results-1" > back </button>
+            <button type="button" ng-click="preone()" ng-disabled="indexnum == 0"> next </button>
+        </div>
+        <button type="button" ng-click="backtosearch()">Back to Search</button>
+
+    </div>
+
+
+
+</body>
+</html>
